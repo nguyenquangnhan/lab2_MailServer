@@ -1,0 +1,21 @@
+=== 2025-10-07T00:37:16.965197700 ===
+From: my <my@123>
+To: nhan@123
+Subject: lab2
+Content:
+hi nhan
+
+=== 2025-10-07T00:39:54.381611600 ===
+From: nhan <nhan@123>
+To: my
+Subject: lab2
+Content:
+hi pmy
+
+=== 2025-10-07T00:42:07.263626800 ===
+From: my <my@123>
+To: nhan
+Subject: fghjkl
+Content:
+sdfghjkl;'
+
