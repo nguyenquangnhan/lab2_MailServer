@@ -92,4 +92,21 @@ public class UserDAO {
             return null;
         }
     }
+    // trả về username nếu tìm thấy, ngược lại trả null
+    public static String getUsernameByEmail(String email) {
+        String sql = "SELECT username FROM users WHERE email = ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("username");
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
 }

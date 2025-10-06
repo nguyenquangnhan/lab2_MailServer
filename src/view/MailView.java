@@ -30,7 +30,7 @@ public class MailView extends JFrame {
         JPanel fields = new JPanel(new GridLayout(2,4,8,8));
         fields.add(new JLabel("From:"));
         fields.add(new JLabel(user.getUsername() + " <" + user.getEmail() + ">"));
-        fields.add(new JLabel("To (username):"));
+        fields.add(new JLabel("To (Email):"));
         tfTo = new JTextField(); fields.add(tfTo);
         fields.add(new JLabel("Subject:"));
         tfSubject = new JTextField(); fields.add(tfSubject);

@@ -16,26 +16,45 @@ public class MailController {
     public static final String SERVER_HOST = "localhost";
     public static final int SERVER_PORT = 8888;
 
-    // Gửi mail đến MailServer qua UDP. Format: sender|senderEmail|receiver|subject|content
     public static boolean sendMail(Mail mail) {
         try (DatagramSocket socket = new DatagramSocket()) {
+            // Nếu người dùng nhập email (có '@') thì thử map sang username
+            String receiverRaw = mail.getReceiver();
+            String receiverResolved = receiverRaw;
+            try {
+                if (receiverRaw != null && receiverRaw.contains("@")) {
+                    // tìm username theo email
+                    String username = model.UserDAO.getUsernameByEmail(receiverRaw);
+                    if (username != null) {
+                        receiverResolved = username;
+                    } else {
+                        // không tìm thấy username, ta vẫn giữ email để server có thể lưu email trực tiếp
+                        receiverResolved = receiverRaw;
+                    }
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                // nếu lỗi DB thì vẫn gửi nguyên receiverRaw
+                receiverResolved = receiverRaw;
+            }
+
+            // build payload: sender|senderEmail|receiverResolved|subject|content
             String payload = escape(mail.getSender()) + "|" + escape(mail.getSenderEmail()) + "|"
-                    + escape(mail.getReceiver()) + "|" + escape(mail.getSubject()) + "|" + escape(mail.getContent());
+                    + escape(receiverResolved) + "|" + escape(mail.getSubject()) + "|" + escape(mail.getContent());
             byte[] data = payload.getBytes("UTF-8");
             DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName(SERVER_HOST), SERVER_PORT);
             socket.send(packet);
 
-            // receive ACK (optional)
+            // optional: nhận ACK
             byte[] buf = new byte[2048];
             DatagramPacket ack = new DatagramPacket(buf, buf.length);
             socket.setSoTimeout(3000);
             try {
                 socket.receive(ack);
                 String r = new String(ack.getData(), 0, ack.getLength(), "UTF-8");
-                // we accept any non-empty reply as success
                 return r != null && !r.isEmpty();
             } catch (Exception e) {
-                // no ack — still return true to indicate we sent (you may want to retry in real app)
+                // không nhận ACK -> vẫn coi là đã gửi (tùy bạn)
                 return true;
             }
         } catch (Exception ex) {
@@ -43,6 +62,7 @@ public class MailController {
             return false;
         }
     }
+
 
     // Escape '|' and newline to avoid breaking format
     private static String escape(String s) {
